@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_name">Food Recommendator</string>
+    <string name="search_your_recipes">Search Your Recipes…</string>
+    <string name="meal_categories">Meal Categories</string>
+    <string name="category">Category</string>
+    <string name="instructions">INSTRUCTIONS</string>
+    <string name="dot_loading">...</string>
+    <string name="Ingredients">INGREDIENTS</string>
+    <string name="Nutrients">NUTRIENTS</string>
+    <string name="About">It is an application that aims to help the users to choose the available foods to cook with the ingredients that they have in their home. Also the application will provide the procedure or the instructions for the cooking of their chosen foods.</string>
+
+
+</resources>
