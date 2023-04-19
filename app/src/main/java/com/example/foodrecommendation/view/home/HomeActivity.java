@@ -11,7 +11,6 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,14 +31,11 @@ import com.example.foodrecommendation.About;
 import com.example.foodrecommendation.R;
 import com.example.foodrecommendation.Utils;
 import com.example.foodrecommendation.adapter.RecyclerViewHomeAdapter;
-import com.example.foodrecommendation.adapter.SearchResultAdapter;
 import com.example.foodrecommendation.adapter.ViewPagerHeaderAdapter;
 import com.example.foodrecommendation.model.Categories;
 import com.example.foodrecommendation.model.Meals;
-import com.example.foodrecommendation.model.MealsItem;
 import com.example.foodrecommendation.view.category.CategoryActivity;
 import com.example.foodrecommendation.view.detail.DetailActivity;
-import com.example.foodrecommendation.view.search.GetMealByIngredient;
 import com.example.foodrecommendation.view.search.SearchActivity;
 
 import java.io.File;
@@ -99,8 +95,11 @@ public class HomeActivity extends AppCompatActivity implements HomeView {
 
     @Override
     public void hideLoading() {
-        findViewById(R.id.shimmerMeal).setVisibility(View.GONE);
-        findViewById(R.id.shimmerCategory).setVisibility(View.GONE);
+        runOnUiThread(() -> {
+            findViewById(R.id.shimmerMeal).setVisibility(View.GONE);
+            findViewById(R.id.shimmerCategory).setVisibility(View.GONE);
+        });
+
     }
 
     private final ActivityResultLauncher<String> selectImageLauncher =
@@ -109,21 +108,28 @@ public class HomeActivity extends AppCompatActivity implements HomeView {
 
                     showLoading();
 
+
                     presenter.recognizeFood(uri, this, new OnGetMealCallback() {
                         @Override
                         public void onSuccess(String name) {
-                            Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
-                            intent.putExtra(EXTRA_DETAIL, name);
-                            startActivity(intent);
-                            hideLoading();
+                            runOnUiThread(() -> {
+                                Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+                                intent.putExtra(EXTRA_DETAIL, name);
+                                startActivity(intent);
+                                hideLoading();
+                            });
+
                         }
 
                         @Override
                         public void onError(String message) {
-                            hideLoading();
-                            Utils.showDialogMessage(HomeActivity.this, "Error", message);
+                            runOnUiThread(() -> {
+                                hideLoading();
+                                Utils.showDialogMessage(HomeActivity.this, "Error", message);
+                            });
                         }
                     });
+
                 }
             });
 
@@ -233,18 +239,25 @@ public class HomeActivity extends AppCompatActivity implements HomeView {
             presenter.recognizeFood(uri, this, new OnGetMealCallback() {
                 @Override
                 public void onSuccess(String foodName) {
-                    Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
-                    intent.putExtra(EXTRA_DETAIL, foodName);
-                    startActivity(intent);
-                    hideLoading();
+                    runOnUiThread(() -> {
+
+                        Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+                        intent.putExtra(EXTRA_DETAIL, foodName);
+                        startActivity(intent);
+                        hideLoading();
+                    });
+
                 }
 
                 @Override
                 public void onError(String message) {
-                    hideLoading();
-                    Utils.showDialogMessage(HomeActivity.this, "Error", message);
+                    runOnUiThread(() -> {
+                        hideLoading();
+                        Utils.showDialogMessage(HomeActivity.this, "Error", message);
+                    });
                 }
             });
+
         }
     }
 
@@ -252,32 +265,35 @@ public class HomeActivity extends AppCompatActivity implements HomeView {
     private void handleCameraResult(int requestCode, int resultCode) {
         if (requestCode == CAMERA_LAUNCH_REQUEST_CODE && resultCode == RESULT_OK) {
             File file = new File(Environment.getExternalStorageDirectory(), "MyPhoto.jpg");
-
             Uri uri = FileProvider.getUriForFile(this, "com.example.foodrecommendation.provider", file);
 
-
             showLoading();
+
             presenter.recognizeFood(uri, this, new OnGetMealCallback() {
                 @Override
                 public void onSuccess(String foodName) {
-                    Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
-                    intent.putExtra(EXTRA_DETAIL, foodName);
-                    startActivity(intent);
-                    hideLoading();
+                    runOnUiThread(() -> {
+                        Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+                        intent.putExtra(EXTRA_DETAIL, foodName);
+                        startActivity(intent);
+                        hideLoading();
+                    });
                 }
 
                 @Override
                 public void onError(String message) {
-                    hideLoading();
-                    Utils.showDialogMessage(HomeActivity.this, "Error", message);
+                    runOnUiThread(() -> {
+                        hideLoading();
+                        Utils.showDialogMessage(HomeActivity.this, "Error", message);
+                    });
                 }
             });
+
         }
     }
 
 
     private void openCamera() {
-
         Intent m_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File file = new File(Environment.getExternalStorageDirectory(), "MyPhoto.jpg");
         Uri uri = FileProvider.getUriForFile(this, "com.example.foodrecommendation.provider", file);

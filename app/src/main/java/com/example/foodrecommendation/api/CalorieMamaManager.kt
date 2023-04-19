@@ -1,24 +1,19 @@
 package com.example.foodrecommendation.api
 
+
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.example.foodrecommendation.model.logmeal.LogMealApiDto
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.*
-
-import java.io.File
-
-
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import org.json.JSONObject
-
 import timber.log.Timber
+import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
@@ -61,9 +56,11 @@ class CalorieMamaManager {
         return file.path
     }
 
-    fun getResults(uri :Uri, context: Context, logMealCallback: LogMealCallback) {
+    fun getResults(uri: Uri, context: Context, logMealCallback: LogMealCallback) {
 
-        GlobalScope.launch(Dispatchers.IO) {
+
+
+
             val imagePath = getRealPathFromURI(uri, context)
             val client = OkHttpClient()
 
@@ -77,12 +74,15 @@ class CalorieMamaManager {
 
             val request = Request.Builder()
                 .url("https://api.logmeal.es/v2/image/segmentation/complete")
-                .addHeader("Authorization", "Bearer dc91f4ccf87aa9ee9fdac66fcc89b98dbbda920b")
+                .addHeader("Authorization", "Bearer $API_KEY")
                 .post(requestBody)
                 .build()
 
+
+
             client.newCall(request).enqueue(object : okhttp3.Callback {
                 override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+
                     logMealCallback.onFailure("Failed to detect dishes")
                 }
 
@@ -96,7 +96,11 @@ class CalorieMamaManager {
                     val code = jsonObject.optInt("code")
 
                     if (code == 114) {
-                        logMealCallback.onFailure("You have reached the request limit within the last 24h. Try again later.")
+                        MainScope().launch {
+                            withContext(Dispatchers.IO) {
+                                logMealCallback.onFailure("You have reached the request limit within the last 24h. Try again later.")
+                            }
+                        }
                         return
                     }
 
@@ -109,36 +113,48 @@ class CalorieMamaManager {
                             .url("https://api.logmeal.es/v2/recipe/ingredients")
                             .addHeader(
                                 "Authorization",
-                                "Bearer ${API_KEY}")
+                                "Bearer $API_KEY")
                             .post(requestBody)
                             .build()
 
                         client.newCall(request).enqueue(object : Callback {
                             override fun onResponse(call: Call, response: Response) {
-                                val responseBody = response.body?.string()
-                                val gson = Gson()
-                                val logMealApiDto =
-                                    gson.fromJson(responseBody, LogMealApiDto::class.java)
-                                logMealCallback.onResponse(logMealApiDto)
 
+                                MainScope().launch {
+                                    withContext(Dispatchers.Default) {
+                                        val responseBody = response.body?.string()
+                                        val gson = Gson()
+                                        val logMealApiDto =
+                                            gson.fromJson(responseBody, LogMealApiDto::class.java)
+                                        logMealCallback.onResponse(logMealApiDto)
+                                    }
+                                }
                             }
 
                             override fun onFailure(call: Call, e: IOException) {
-                                logMealCallback.onFailure("Failed to get ingredients")
+                                MainScope().launch {
+                                    withContext(Dispatchers.Default) {
+                                        logMealCallback.onFailure("Failed to get ingredients")
+                                    }
+                                }
                             }
                         })
+
+
                     } else {
-                        logMealCallback.onFailure("Failed to get imageId")
+                        MainScope().launch {
+                            withContext(Dispatchers.Default) {
+                                logMealCallback.onFailure("Failed to get imageId")
+                            }
+                        }
                     }
                 }
             })
-        }
-
-        }
+    }
 }
 
-interface LogMealCallback{
+interface LogMealCallback {
     fun onResponse(jsonObject: LogMealApiDto)
-    fun onFailure(message:String)
+    fun onFailure(message: String)
 }
 

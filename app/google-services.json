@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "155170247289",
+    "project_id": "food-recommendation-c76d5",
+    "storage_bucket": "food-recommendation-c76d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155170247289:android:276e77138ef60bdc183aa8",
+        "android_client_info": {
+          "package_name": "com.example.foodrecommendation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "155170247289-kmjbe7c6r77pehlkqm6acvbak2vrvc20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ6WZTfaNcp4RD1MIxs04u9FcQhkmKkwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "155170247289-kmjbe7c6r77pehlkqm6acvbak2vrvc20.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
